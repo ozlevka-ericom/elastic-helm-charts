@@ -31,16 +31,6 @@ spec:
         chart: "{{ .Chart.Name }}-{{ .Chart.Version }}"
         app: "{{ template "uname" . }}"
     spec:
-      securityContext:
-        fsGroup: {{ .Values.fsGroup }}
-      {{- with .Values.tolerations }}
-      tolerations:
-{{ toYaml . | indent 6 }}
-      {{- end }}
-      {{- with .Values.nodeSelector }}
-      nodeSelector:
-{{ toYaml . | indent 8 }}
-      {{- end }}
       {{- if eq .Values.antiAffinity "hard" }}
       affinity:
         podAntiAffinity:
@@ -85,7 +75,19 @@ spec:
           runAsUser: 0
           privileged: true
         image: "{{ .Values.image }}:{{ .Values.imageTag }}"
-        command: ["sysctl", "-w", "vm.max_map_count={{ .Values.sysctlVmMaxMapCount}}"]
+        volumeMounts:
+         - name: "{{ template "uname" . }}"
+           mountPath: /usr/share/elasticsearch/data
+        command: 
+          - sh
+          - -c
+          - |
+            #!/usr/bin/env bash -e
+            echo "Test"
+            sysctl -w  vm.max_map_count={{ .Values.sysctlVmMaxMapCount }}
+            echo "After sysctl"
+            chown -R 1000:1000 /usr/share/elasticsearch/data
+            echo "Finish"
       containers:
       - name: "{{ template "name" . }}"
         image: "{{ .Values.image }}:{{ .Values.imageTag }}"

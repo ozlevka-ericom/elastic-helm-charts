@@ -19,7 +19,7 @@ secretMounts:
 #    secretName: elastic-certificates
 #    path: /usr/share/elasticsearch/config/certs
 
-image: "docker.elastic.co/kibana/kibana"
+image: "docker.elastic.co/kibana/kibana-oss"
 imageTag: "6.5.4"
 imagePullPolicy: "IfNotPresent"
 
